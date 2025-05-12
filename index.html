@@ -109,7 +109,7 @@
 </head>
 <body>
   <header>
-    <h1>Order for <span id="tableNumber">Food</span></h1>
+    <h1>Order for <span id="tableNumber">Delicious Food</span></h1>
   </header>
 
   <div id="app">
@@ -131,7 +131,7 @@
   </div>
 
   <script>
-    const table = new URLSearchParams(location.search).get("table") || "Unknown";
+    const table = "Delicious Food"; // This line now sets the table name to "Delicious Food"
     document.getElementById("tableNumber").textContent = table;
 
     const menuData = {
