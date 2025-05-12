@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Table Order | Restaurant</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #e74c3c;
+      --light: #fff;
+      --gray: #95a5a6;
+      --success: #27ae60;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+
+    body {
+      background: #f5f5f5;
+      color: var(--primary);
+      max-width: 960px;
+      margin: auto;
+      padding: 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 span {
+      color: var(--secondary);
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .menu-category,
+    #cart {
+      background: var(--light);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+    }
+
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+    }
+
+    .menu-item button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .menu-item button:hover {
+      background: var(--secondary);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+    }
+
+    #placeOrder {
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      width: 100%;
+      margin-top: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #orderConfirmation {
+      display: none;
+      background: var(--light);
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Order for <span id="tableNumber">Food</span></h1>
+  </header>
+
+  <div id="app">
+    <section id="menu"></section>
+
+    <section id="cart">
+      <h2>Your Order</h2>
+      <ul id="cartItems">
+        <li>No items yet</li>
+      </ul>
+      <div id="cartTotal" style="text-align: right; font-weight: bold;"></div>
+      <button id="placeOrder">Place Order</button>
+    </section>
+
+    <div id="orderConfirmation">
+      <h2>Order Placed!</h2>
+      <p>Thank you! Your order has been received.</p>
+    </div>
+  </div>
+
+  <script>
+    const table = new URLSearchParams(location.search).get("table") || "Unknown";
+    document.getElementById("tableNumber").textContent = table;
+
+    const menuData = {
+      Foods: [
+        { id: 1, name: "Bruschetta", price: 8.99 },
+        { id: 2, name: "Calamari", price: 12.99 },
+      ],
+      Drinks: [
+        { id: 3, name: "Coke", price: 2.99 },
+        { id: 4, name: "Water", price: 1.99 },
+      ],
+    };
+
+    const menuEl = document.getElementById("menu");
+    const cart = [];
+
+    function renderMenu() {
+      menuEl.innerHTML = "";
+      for (const category in menuData) {
+        const section = document.createElement("div");
+        section.className = "menu-category";
+        section.innerHTML = `<h2>${category}</h2>`;
+        menuData[category].forEach(item => {
+          const div = document.createElement("div");
+          div.className = "menu-item";
+          div.innerHTML = `
+            <span>${item.name} - $${item.price.toFixed(2)}</span>
+            <button onclick='addToCart(${JSON.stringify(item)})'>Add</button>
+          `;
+          section.appendChild(div);
+        });
+        menuEl.appendChild(section);
+      }
+    }
+
+    function addToCart(item) {
+      const existing = cart.find(i => i.id === item.id);
+      if (existing) existing.quantity++;
+      else cart.push({ ...item, quantity: 1 });
+      renderCart();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartItems = document.getElementById("cartItems");
+      cartItems.innerHTML = "";
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const li = document.createElement("li");
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+
+        li.innerHTML = `
+          <span>${item.name} x ${item.quantity} = $${itemTotal.toFixed(2)}</span>
+          <button onclick="removeFromCart(${index})" style="margin-left: 1rem; background: #e74c3c; color: white; border: none; padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer;">Remove</button>
+        `;
+        cartItems.appendChild(li);
+      });
+
+      if (cart.length === 0) {
+        cartItems.innerHTML = "<li>No items yet</li>";
+      }
+
+      document.getElementById("cartTotal").textContent =
+        total > 0 ? `Total: $${total.toFixed(2)}` : "";
+    }
+
+    document.getElementById("placeOrder").onclick = () => {
+      if (!cart.length) return alert("Cart is empty.");
+      console.log("Order for table", table, cart);
+      document.getElementById("orderConfirmation").style.display = "block";
+      cart.length = 0;
+      renderCart();
+    };
+
+    renderMenu();
+  </script>
+</body>
+</html>
